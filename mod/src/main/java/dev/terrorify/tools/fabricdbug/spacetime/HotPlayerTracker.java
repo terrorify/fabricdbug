@@ -20,7 +20,7 @@ public final class HotPlayerTracker {
     public Map<String, Position> snapshot() { return Map.copyOf(positions); }
 
     public void tick() {
-        if (!SpacetimeConfig.ENABLED || ++ticks % SpacetimeConfig.POSITION_POLL_TICKS != 0
+        if (!SpacetimeConfig.isEnabled() || ++ticks % SpacetimeConfig.getPositionPollTicks() != 0
             || !queryRunning.compareAndSet(false, true)) return;
         client.sqlRowsAsync("SELECT player_uuid, world_id, server_id, x, y, z, timestamp FROM player_physics_state")
             .whenComplete((rows, error) -> {

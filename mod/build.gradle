@@ -12,6 +12,8 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	compileOnly files('/home/trapaholics/.local/share/ModrinthApp/profiles/Fabric 26.2/mods/modmenu-20.0.3.jar')
+	compileOnly files('/home/trapaholics/.local/share/ModrinthApp/profiles/Fabric 26.2/mods/yet_another_config_lib_v3-3.9.7+26.2-fabric.jar')
 }
 
 processResources {

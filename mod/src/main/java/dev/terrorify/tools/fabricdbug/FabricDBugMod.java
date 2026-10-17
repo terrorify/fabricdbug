@@ -16,6 +16,7 @@ public final class FabricDBugMod implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        dev.terrorify.tools.fabricdbug.config.FabricDBugConfig.get();
         HotPlayerTracker hotPlayers = new HotPlayerTracker();
         InputScriptEngine scripts = new InputScriptEngine();
         SpacetimeCommandFeed commands = new SpacetimeCommandFeed(scripts);

@@ -22,7 +22,7 @@ public final class SpacetimeClient {
 
     public void callReducerAsync(String reducer, JsonArray args) {
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(SpacetimeConfig.URI + "/v1/database/" + SpacetimeConfig.HOT_DB + "/call/" + reducer))
+            .uri(URI.create(SpacetimeConfig.getUri() + "/v1/database/" + SpacetimeConfig.getHotDb() + "/call/" + reducer))
             .timeout(Duration.ofSeconds(5))
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(args.toString()))
@@ -35,7 +35,7 @@ public final class SpacetimeClient {
 
     public CompletableFuture<JsonArray> sqlRowsAsync(String sql) {
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(SpacetimeConfig.URI + "/v1/database/" + SpacetimeConfig.HOT_DB + "/sql"))
+            .uri(URI.create(SpacetimeConfig.getUri() + "/v1/database/" + SpacetimeConfig.getHotDb() + "/sql"))
             .timeout(Duration.ofSeconds(5))
             .header("Content-Type", "text/plain")
             .POST(HttpRequest.BodyPublishers.ofString(sql))

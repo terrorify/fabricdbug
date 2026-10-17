@@ -32,7 +32,7 @@ public final class SpacetimeCommandFeed {
     public SpacetimeCommandFeed(InputScriptEngine scripts) { this.scripts = scripts; }
 
     public void onJoin() {
-        if (!SpacetimeConfig.ENABLED) return;
+        if (!SpacetimeConfig.isEnabled()) return;
         if (Minecraft.getInstance().getUser() == null) return;
         UUID uuid = Minecraft.getInstance().getUser().getProfileId();
         targetUuid = uuid == null ? null : uuid.toString();
@@ -47,8 +47,8 @@ public final class SpacetimeCommandFeed {
     }
 
     public void tick() {
-        if (!SpacetimeConfig.ENABLED || targetUuid == null
-            || ++ticks % SpacetimeConfig.COMMAND_POLL_TICKS != 0 || polling) return;
+        if (!SpacetimeConfig.isEnabled() || targetUuid == null
+            || ++ticks % SpacetimeConfig.getCommandPollTicks() != 0 || polling) return;
         polling = true;
         if (!initialized) {
             client.sqlRowsAsync("SELECT id FROM command_intent")
