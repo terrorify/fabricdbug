@@ -25,7 +25,7 @@ try {
     $health = Invoke-WebRequest -Method Get -Uri "$($Uri.TrimEnd('/'))/v1/health" -TimeoutSec 10
     if ($health.StatusCode -ge 300) { throw "Hot health returned HTTP $($health.StatusCode)" }
 
-    $sql = Invoke-Hot 'Post' '/sql' 'SELECT id, target_uuid, intent_type, payload FROM command_intent ORDER BY id DESC LIMIT 1' 'text/plain'
+    $sql = Invoke-Hot 'Post' '/sql' 'SELECT id, target_uuid, intent_type, payload FROM command_intent' 'text/plain'
     if ($sql.StatusCode -ge 300) { throw "Hot SQL returned HTTP $($sql.StatusCode)" }
 
     # Custom intent 11 is the FabricDBug control lane. The client consumes it

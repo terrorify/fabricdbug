@@ -39,7 +39,7 @@ def main() -> int:
             raise SpacetimeError(f"Hot health endpoint unreachable at {args.uri}/v1/health")
 
         # 2. SQL query check
-        client.sql("SELECT id, target_uuid, intent_type, payload FROM command_intent ORDER BY id DESC LIMIT 1")
+        client.sql("SELECT id, target_uuid, intent_type, payload FROM command_intent")
 
         # 3. Custom intent 11 dispatch (FabricDBug control lane)
         payload = {
