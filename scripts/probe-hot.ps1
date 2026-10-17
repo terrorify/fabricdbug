@@ -1,10 +1,10 @@
 [CmdletBinding()]
 param(
-    [string]$Uri = 'http://127.0.0.1:13002',
-    [string]$Database = 'stomzydevhot',
+    [string]$Uri = 'http://127.0.0.1:3000',
+    [string]$Database = 'soupkitzhot',
     [Parameter(Mandatory = $true)] [string]$TargetUuid,
-    [string]$ServerId = 'fabricdbug-probe',
-    [string]$WorldId = 'stomzydev'
+    [string]$ServerId = 'soupkitz-01',
+    [string]$WorldId = 'soupkitz'
 )
 
 $ErrorActionPreference = 'Stop'

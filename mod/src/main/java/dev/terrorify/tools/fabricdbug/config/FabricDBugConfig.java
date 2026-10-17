@@ -20,7 +20,7 @@ public class FabricDBugConfig {
 
     public boolean enabled = true;
     public String uri = "http://127.0.0.1:3000";
-    public String hotDb = "stomzydevhot";
+    public String hotDb = "soupkitzhot";
     public int positionPollTicks = 5;
     public int commandPollTicks = 5;
 

@@ -32,8 +32,8 @@ def run(
     target_uuid: str,
     yaw: float,
     pitch: float,
-    uri: str = "http://127.0.0.1:13002",
-    database: str = "stomzydevhot",
+    uri: str = "http://127.0.0.1:3000",
+    database: str = "soupkitzhot",
     timeout_sec: float = 10.0,
 ) -> int:
     client = SpacetimeClient(uri=uri, database=database)
@@ -111,8 +111,8 @@ if __name__ == "__main__":
     parser.add_argument("--target-uuid", required=True, help="FabricDBug Minecraft player UUID")
     parser.add_argument("--yaw", type=float, default=180.0, help="Target yaw angle in degrees")
     parser.add_argument("--pitch", type=float, default=0.0, help="Target pitch angle in degrees")
-    parser.add_argument("--uri", default="http://127.0.0.1:13002", help="SpacetimeDB HTTP base URI")
-    parser.add_argument("--database", default="stomzydevhot", help="SpacetimeDB database name")
+    parser.add_argument("--uri", default="http://127.0.0.1:3000", help="SpacetimeDB HTTP base URI")
+    parser.add_argument("--database", default="soupkitzhot", help="SpacetimeDB database name")
     parser.add_argument("--timeout", type=float, default=10.0, help="Polling timeout in seconds")
     args = parser.parse_args()
     raise SystemExit(run(args.target_uuid, args.yaw, args.pitch, uri=args.uri, database=args.database, timeout_sec=args.timeout))

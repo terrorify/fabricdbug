@@ -23,11 +23,11 @@ from spacetime import SpacetimeClient, SpacetimeError  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--uri", default="http://127.0.0.1:13002", help="SpacetimeDB HTTP base URI")
-    parser.add_argument("--database", default="stomzydevhot", help="SpacetimeDB database name")
+    parser.add_argument("--uri", default="http://127.0.0.1:3000", help="SpacetimeDB HTTP base URI")
+    parser.add_argument("--database", default="soupkitzhot", help="SpacetimeDB database name")
     parser.add_argument("--target-uuid", required=True, help="FabricDBug Minecraft player UUID")
-    parser.add_argument("--server-id", default="fabricdbug-probe", help="Server identifier")
-    parser.add_argument("--world-id", default="stomzydev", help="World identifier")
+    parser.add_argument("--server-id", default="soupkitz-01", help="Server identifier")
+    parser.add_argument("--world-id", default="soupkitz", help="World identifier")
     args = parser.parse_args()
 
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")

@@ -22,8 +22,8 @@ class SpacetimeError(RuntimeError):
 class SpacetimeClient:
     def __init__(
         self,
-        uri: str = "http://127.0.0.1:13002",
-        database: str = "stomzydevhot",
+        uri: str = "http://127.0.0.1:3000",
+        database: str = "soupkitzhot",
         timeout: float = 10.0,
     ):
         self.uri = uri.rstrip("/")
