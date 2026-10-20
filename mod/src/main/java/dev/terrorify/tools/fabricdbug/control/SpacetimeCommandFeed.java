@@ -7,6 +7,9 @@ import dev.terrorify.tools.fabricdbug.input.InputScriptEngine;
 import dev.terrorify.tools.fabricdbug.spacetime.SpacetimeClient;
 import dev.terrorify.tools.fabricdbug.spacetime.SpacetimeConfig;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.multiplayer.ServerData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,32 +31,67 @@ public final class SpacetimeCommandFeed {
     private boolean initialized;
     private int ticks;
     private boolean polling;
+    private boolean readyReported;
 
     public SpacetimeCommandFeed(InputScriptEngine scripts) { this.scripts = scripts; }
 
     public void onJoin() {
-        if (!SpacetimeConfig.isEnabled()) return;
-        if (Minecraft.getInstance().getUser() == null) return;
-        UUID uuid = Minecraft.getInstance().getUser().getProfileId();
-        targetUuid = uuid == null ? null : uuid.toString();
-        initialized = false;
-        lastCommandId = 0;
+        ensureTarget();
+        reportEvent("joined", "{}");
     }
 
     public void onDisconnect() {
-        targetUuid = null;
-        initialized = false;
+        // Keep the account UUID so commands can be polled and executed from the title screen.
         scripts.stop();
+        reportEvent("disconnected", "{}");
+    }
+
+    private void ensureTarget() {
+        if (!SpacetimeConfig.isEnabled() || targetUuid != null) return;
+        var user = Minecraft.getInstance().getUser();
+        if (user == null || user.getProfileId() == null) return;
+        targetUuid = user.getProfileId().toString();
+        initialized = false;
+        lastCommandId = 0;
+        if (!readyReported) {
+            readyReported = true;
+            reportEvent("client_ready", "{\"screen\":\"title_or_menu\"}");
+        }
+    }
+
+    private void reportEvent(String kind, String payload) {
+        if (targetUuid == null) return;
+        JsonArray args = new JsonArray();
+        args.add(targetUuid);
+        args.add(kind);
+        args.add(payload);
+        client.callReducerAsync("report_fabricdbug_event", args);
     }
 
     public void tick() {
+        ensureTarget();
         if (!SpacetimeConfig.isEnabled() || targetUuid == null
             || ++ticks % SpacetimeConfig.getCommandPollTicks() != 0 || polling) return;
         polling = true;
         if (!initialized) {
-            client.sqlRowsAsync("SELECT id FROM command_intent")
+            String safeUuid = targetUuid.replace("'", "''");
+            client.sqlRowsAsync("SELECT id, payload FROM command_intent WHERE target_uuid = '" + safeUuid
+                + "' AND intent_type = 11")
                 .thenAccept(rows -> Minecraft.getInstance().execute(() -> {
-                    for (var row : rows) lastCommandId = Math.max(lastCommandId, row.getAsJsonArray().get(0).getAsLong());
+                    long latestConnect = -1;
+                    for (var element : rows) {
+                        JsonArray row = element.getAsJsonArray();
+                        long id = row.get(0).getAsLong();
+                        lastCommandId = Math.max(lastCommandId, id);
+                        try {
+                            JsonObject command = JsonParser.parseString(row.get(1).getAsString()).getAsJsonObject();
+                            if ("connect".equals(command.has("action") ? command.get("action").getAsString() : "")) {
+                                latestConnect = Math.max(latestConnect, id);
+                            }
+                        } catch (Exception ignored) { }
+                    }
+                    // A queued connect survives a client restart; other stale actions do not replay.
+                    if (latestConnect > 0) lastCommandId = latestConnect - 1;
                     initialized = true;
                     polling = false;
                 }));
@@ -80,6 +118,15 @@ public final class SpacetimeCommandFeed {
         try {
             JsonObject command = JsonParser.parseString(payload).getAsJsonObject();
             switch (command.get("action").getAsString()) {
+                case "connect" -> {
+                    var minecraft = Minecraft.getInstance();
+                    String address = command.has("address") ? command.get("address").getAsString() : "127.0.0.1:25565";
+                    var server = new ServerData("FabricDBug local test", address, ServerData.Type.OTHER);
+                    ConnectScreen.startConnecting(new TitleScreen(), minecraft,
+                        net.minecraft.client.multiplayer.resolver.ServerAddress.parseString(address),
+                        server, false, null);
+                    reportEvent("connect_requested", "{\"address\":\"" + address + "\"}");
+                }
                 case "stop" -> scripts.stop();
                 case "run_script" -> scripts.start(parseSteps(command.getAsJsonArray("steps")));
                 case "freelook_start" -> FreelookBridge.start(

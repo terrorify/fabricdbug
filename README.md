@@ -13,6 +13,14 @@ It contains no MCP server, JSON-RPC tool registry, or local agent endpoint.
   `command_intent_execute` reducer with `intent_type = 11`, `target_uuid` set
   to the debug client's UUID, and a JSON `payload`.
 
+FabricDBug now reports `client_ready` when the profile is available and polls
+commands from the title/menu screen. That allows the harness to connect the
+client without keyboard or mouse automation:
+
+```json
+{"action":"connect","address":"127.0.0.1:25565"}
+```
+
 Supported payloads:
 
 ```json
