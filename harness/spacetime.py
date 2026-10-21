@@ -58,6 +58,19 @@ class SpacetimeClient:
             raw = e.read().decode("utf-8")
             raise SpacetimeError(f"SQL failed ({e.code}): {raw}") from e
 
+    @staticmethod
+    def _sql_rows(result: Any) -> list[dict[str, Any]]:
+        """Convert SpacetimeDB's schema + positional rows response to dictionaries."""
+        if not isinstance(result, list) or not result:
+            return []
+        table = result[0]
+        columns = [
+            element.get("name", {}).get("some")
+            for element in table.get("schema", {}).get("elements", [])
+        ]
+        rows = table.get("rows", [])
+        return [dict(zip(columns, row)) for row in rows if isinstance(row, list)]
+
     def call_reducer(self, reducer: str, args: Sequence[Any]) -> Any:
         """Invoke a SpacetimeDB reducer with positional arguments."""
         url = f"{self.base_url}/call/{reducer}"
@@ -124,12 +137,21 @@ class SpacetimeClient:
 
     def query_latest_intent(self) -> Any:
         """Fetch the most recent command intent recorded in SpacetimeDB."""
-        return self.sql("SELECT id, target_uuid, intent_type, payload FROM command_intent ORDER BY id DESC LIMIT 1")
+        rows = self._sql_rows(
+            self.sql("SELECT id, target_uuid, intent_type, payload FROM command_intent")
+        )
+        return max(rows, key=lambda row: row["id"], default=None)
 
     def query_latest_events(self, target_uuid: str | None = None, limit: int = 10) -> Any:
         """Fetch events emitted by FabricDBug (snapshots, screenshots, etc.)."""
         if target_uuid:
-            q = f"SELECT * FROM fabricdbug_event WHERE target_uuid = '{target_uuid}' ORDER BY id DESC LIMIT {limit}"
+            safe_uuid = target_uuid.replace("'", "''")
+            q = (
+                "SELECT id, target_uuid, kind, payload FROM fabricdbug_event "
+                f"WHERE target_uuid = '{safe_uuid}'"
+            )
         else:
-            q = f"SELECT * FROM fabricdbug_event ORDER BY id DESC LIMIT {limit}"
-        return self.sql(q)
+            q = "SELECT id, target_uuid, kind, payload FROM fabricdbug_event"
+        rows = self._sql_rows(self.sql(q))
+        rows.sort(key=lambda row: row["id"], reverse=True)
+        return rows[:max(0, limit)]

@@ -72,8 +72,8 @@ def run(
         if not events:
             continue
         for row in events:
-            # Events report (target_uuid, event_type, payload)
-            if isinstance(row, dict) and row.get("event_type") == "snapshot":
+            # Events report (target_uuid, kind, payload).
+            if isinstance(row, dict) and row.get("kind") == "snapshot":
                 try:
                     payload = json.loads(row.get("payload", "{}"))
                     if payload.get("request") == "rotation-check":
