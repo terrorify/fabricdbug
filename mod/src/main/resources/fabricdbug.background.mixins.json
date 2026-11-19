@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "dev.terrorify.tools.fabricdbug.background",
+  "compatibilityLevel": "JAVA_25",
+  "client": ["BackgroundMinecraftMixin", "BackgroundWindowMixin"],
+  "injectors": {"defaultRequire": 1}
+}

@@ -19,11 +19,23 @@ public class FabricDBugConfig {
     private static FabricDBugConfig instance;
 
     public boolean enabled = true;
+    public String instanceId = "instance_a";
     public String uri = "http://127.0.0.1:3000";
     public String hotDb = "soupkitzhot";
+    public String controlDb = "fabricdbug_control";
     public int positionPollTicks = 5;
     public int commandPollTicks = 5;
-
+    public boolean tracersEnabled = true;
+    public boolean memoryEspEnabled = true;
+    public boolean serverEspEnabled = true;
+    public boolean chamsEnabled = false;
+    public boolean chunkDebugEnabled = false;
+    public String espBoxMode = "box";
+    public String memoryEspColor = "#40C4FF";
+    public String serverMatchedColor = "#69F0AE";
+    public String serverOnlyColor = "#FF5252";
+    public String chunkGridColor = "#6677AAFF";
+    public String offlineUsername = "";
     public static FabricDBugConfig get() {
         if (instance == null) {
             instance = load();

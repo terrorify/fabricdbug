@@ -17,6 +17,13 @@ public final class SpacetimeConfig {
     public static String getHotDb() {
         return FabricDBugConfig.get().hotDb;
     }
+    public static String getInstanceId() {
+        return FabricDBugConfig.get().instanceId;
+    }
+
+    public static String getControlDb() {
+        return FabricDBugConfig.get().controlDb;
+    }
 
     public static int getPositionPollTicks() {
         return FabricDBugConfig.get().positionPollTicks;

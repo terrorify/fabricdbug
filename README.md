@@ -20,6 +20,17 @@ client without keyboard or mouse automation:
 ```json
 {"action":"connect","address":"127.0.0.1:25565"}
 ```
+For unattended testing while another client is in use, launch a **separate**
+profile and test identity with the JVM option `-Dfabricdbug.background=true`.
+The test window is never shown, and its initial focus state is cleared so it
+cannot capture the player's mouse. This is a real rendering/network client,
+not Java's headless renderer. Normal launches remain unchanged.
+
+Use a distinct UUID and `instanceId` for the background profile; address its
+commands to that UUID, never the playing user's UUID. On startup the command
+feed establishes a watermark and does not replay old commands. Wait for
+`client_ready` before issuing a fresh `connect`.
+
 
 Supported payloads:
 
@@ -34,6 +45,13 @@ Supported payloads:
 {"action":"zoom_stop"}
 {"action":"screenshot"}
 {"action":"snapshot","request":"rotation-check"}
+{"action":"inventory_snapshot"}
+{"action":"creative_set_slot","slot":36,"item":"minecraft:diamond_sword"}
+{"action":"inventory_click","containerId":0,"slotId":36,"button":0,"clickType":"PICKUP"}
+{"action":"catalog_test"}
+{"action":"disconnect"}
+{"action":"codec_probe"}
+{"action":"component_probe","cases":[{"id":6,"case":"literal-name","payload":"CAABeA=="}]}
 ```
 
 Snapshots report local and visible-player `yaw`, `pitch`, and `headYaw`
@@ -41,6 +59,15 @@ alongside positions through `fabricdbug_event`. Use a `run_script` step with
 empty `keys` and explicit `yaw`/`pitch` to test stationary look replication,
 then snapshot both clients. Compare angles modulo 360; network head yaw is
 quantized to 1/256 of a turn (about 1.41 degrees).
+
+Inventory and Catalog actions:
+- `inventory_snapshot`: captures container ID, state ID, cursor stack with components, slot details, and screen connection state.
+- `creative_set_slot`: sets creative slot via vanilla packet encoding.
+- `inventory_click`: invokes vanilla `handleContainerInput` using `ContainerInput` names such as `PICKUP`, `QUICK_MOVE`, `SWAP`, `QUICK_CRAFT`, and `PICKUP_ALL`.
+- `catalog_test`: requires a connected creative player; rebuilds creative tabs and sends one stack at a time, checking the server's new state ID and exact item/components/count before continuing. Reports mismatches, acknowledgement timeouts, progress, completion, and disconnects.
+- `disconnect`: triggers client disconnect and captures disconnected screen snapshot (reason/title) for reconnect verification.
+- `codec_probe`: exports trusted/untrusted ItemStack bytes and effective prototype components to JSONL; reports distinct registry IDs, successful rows, and serialization failures.
+- `component_probe`: decodes base64 component payloads with Mojang's component codecs and reports acceptance only when the entire payload is consumed.
 
 Freelook is discovered by Fabric entrypoint at runtime, so FabricDBug still
 builds without a hard dependency on its jar. Install Freelook 1.4.3 for

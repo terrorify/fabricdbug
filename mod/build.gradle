@@ -6,14 +6,30 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
+	mavenCentral()
+	maven { url = "https://maven.terraformersmc.com/" }
+	maven { url = "https://maven.isxander.dev/releases" }
 }
+
+def modrinthProfileDir = System.getenv("MODRINTH_MODS_DIR") ?: "/mnt/c/Users/mcnar/AppData/Roaming/ModrinthApp/profiles/Fabric 26.2/mods"
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	compileOnly files('/home/trapaholics/.local/share/ModrinthApp/profiles/Fabric 26.2/mods/modmenu-20.0.3.jar')
-	compileOnly files('/home/trapaholics/.local/share/ModrinthApp/profiles/Fabric 26.2/mods/yet_another_config_lib_v3-3.9.7+26.2-fabric.jar')
+
+	def modDir = file(modrinthProfileDir)
+	if (file("${modDir}/modmenu-20.0.3.jar").exists()) {
+		compileOnly files("${modDir}/modmenu-20.0.3.jar")
+	} else {
+		compileOnly "com.terraformersmc:modmenu:20.0.3"
+	}
+
+	if (file("${modDir}/yet_another_config_lib_v3-3.9.7+26.2-fabric.jar").exists()) {
+		compileOnly files("${modDir}/yet_another_config_lib_v3-3.9.7+26.2-fabric.jar")
+	} else {
+		compileOnly "dev.isxander.yacl:yet-another-config-lib-fabric:3.9.7+26.2-fabric"
+	}
 }
 
 processResources {
@@ -32,4 +48,17 @@ tasks.withType(JavaCompile).configureEach {
 java {
 	sourceCompatibility = JavaVersion.VERSION_25
 	targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.register('deployMod') {
+	dependsOn 'build'
+	doLast {
+		copy {
+			from layout.buildDirectory.dir("libs")
+			include "*${project.version}.jar"
+			exclude "*-dev.jar", "*-sources.jar"
+			into file(modrinthProfileDir)
+		}
+		println "Deployed fabricdbug-${project.version}.jar to ${modrinthProfileDir}"
+	}
 }
